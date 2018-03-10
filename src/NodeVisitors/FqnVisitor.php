@@ -29,6 +29,16 @@ class FqnVisitor extends NodeVisitorAbstract
     protected $imported = [];
 
     /**
+     * @var int
+     */
+    protected $classEndsAt = -1;
+
+    /**
+     * @var bool
+     */
+    protected $hasNamespace = false;
+
+    /**
      * FqnNodeVisitor constructor.
      *
      * @param array $imported
@@ -84,19 +94,16 @@ class FqnVisitor extends NodeVisitorAbstract
      */
     protected function hasNamespace(Node $node): bool
     {
-        static $classEndsAt = -1;
-        static $hasNamespace = false;
-
-        if (!$hasNamespace && $node instanceof Class_) {
-            $hasNamespace = $node->namespacedName->isQualified();
-            $classEndsAt = $node->getEndLine();
+        if (!$this->hasNamespace && $node instanceof Class_) {
+            $this->hasNamespace = $node->namespacedName->isQualified();
+            $this->classEndsAt = $node->getEndLine();
         }
 
-        if ($hasNamespace && $node->getStartLine() >= $classEndsAt) {
-            $hasNamespace = false;
-            $classEndsAt = -1;
+        if ($this->hasNamespace && $node->getStartLine() >= $this->classEndsAt) {
+            $this->hasNamespace = false;
+            $this->classEndsAt = -1;
         }
 
-        return $hasNamespace;
+        return $this->hasNamespace;
     }
 }
