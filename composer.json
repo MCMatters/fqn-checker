@@ -8,11 +8,12 @@
         }
     ],
     "require": {
+        "php": ">=7.0",
         "nikic/php-parser": "^4.0"
     },
     "autoload": {
         "psr-4": {
-            "McMatters\\FqnChecker\\": "src"
+            "McMatters\\FqnChecker\\": "src/"
         }
     }
 }

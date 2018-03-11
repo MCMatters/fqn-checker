@@ -4,7 +4,8 @@ declare(strict_types = 1);
 
 namespace McMatters\FqnChecker\Tokenizers;
 
-use const false, null, true, T_FUNCTION, T_STRING, T_USE;
+use const false, null, true;
+use const T_FUNCTION, T_STRING, T_USE;
 use function array_slice, is_array, is_string, token_get_all;
 
 /**
