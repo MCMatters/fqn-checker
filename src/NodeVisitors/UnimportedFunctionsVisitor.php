@@ -12,16 +12,16 @@ use PhpParser\NodeVisitorAbstract;
 use const false;
 
 /**
- * Class FqnVisitor
+ * Class UnimportedFunctionsVisitor
  *
  * @package McMatters\FqnChecker\NodeVisitors
  */
-class FqnVisitor extends NodeVisitorAbstract
+class UnimportedFunctionsVisitor extends NodeVisitorAbstract
 {
     /**
      * @var array
      */
-    protected $functions = [];
+    protected $unimported = [];
 
     /**
      * @var array
@@ -59,7 +59,7 @@ class FqnVisitor extends NodeVisitorAbstract
             return;
         }
 
-        $this->functions[] = [
+        $this->unimported[] = [
             'line'     => $node->getLine(),
             'function' => $node->name->toString(),
         ];
@@ -68,9 +68,9 @@ class FqnVisitor extends NodeVisitorAbstract
     /**
      * @return array
      */
-    public function getFunctions(): array
+    public function getUnimported(): array
     {
-        return $this->functions;
+        return $this->unimported;
     }
 
     /**

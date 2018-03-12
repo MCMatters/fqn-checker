@@ -19,7 +19,10 @@ use McMatters\FqnChecker\FqnChecker;
 
 require 'vendor/autoload.php';
 
-print_r(FqnChecker::check(file_get_contents(__DIR__.'/Wrong.php')));
+$checker = new FqnChecker(file_get_contents(__DIR__.'/Wrong.php'));
+
+print_r($checker->getUnimported());
+print_r($checker->getImported());
 ```
 
 Listing of **Wrong.php**
@@ -31,11 +34,18 @@ declare(strict_types = 1);
 
 namespace Acme;
 
+use function ucfirst;
+
 class Wrong
 {
-    public function test()
+    public function testArray()
     {
         return array_filter([]);
+    }
+    
+    public function testString()
+    {
+        return ucfirst('hello');
     }
 }
 ```
@@ -49,6 +59,10 @@ Array
             [line] => 11
             [function] => array_filter
         )
+)
 
+Array
+(
+    [ucfirst] => true
 )
 ```
