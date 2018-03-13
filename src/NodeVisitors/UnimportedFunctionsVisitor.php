@@ -7,7 +7,7 @@ namespace McMatters\FqnChecker\NodeVisitors;
 use PhpParser\Node;
 use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Name;
-use PhpParser\Node\Stmt\Class_;
+use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\NodeVisitorAbstract;
 use const false;
 
@@ -94,8 +94,8 @@ class UnimportedFunctionsVisitor extends NodeVisitorAbstract
      */
     protected function hasNamespace(Node $node): bool
     {
-        if (!$this->hasNamespace && $node instanceof Class_) {
-            $this->hasNamespace = $node->namespacedName->isQualified();
+        if (!$this->hasNamespace && $node instanceof Namespace_) {
+            $this->hasNamespace = true;
             $this->classEndsAt = $node->getEndLine();
         }
 
