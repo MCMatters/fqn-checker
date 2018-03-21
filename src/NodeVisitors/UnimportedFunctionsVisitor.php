@@ -96,10 +96,10 @@ class UnimportedFunctionsVisitor extends NodeVisitorAbstract
     {
         if (!$this->hasNamespace && $node instanceof Namespace_) {
             $this->hasNamespace = true;
-            $this->classEndsAt = $node->getEndLine();
+            $this->classEndsAt = $node->getAttribute('endLine');
         }
 
-        if ($this->hasNamespace && $node->getStartLine() >= $this->classEndsAt) {
+        if ($this->hasNamespace && $node->getAttribute('startLine') >= $this->classEndsAt) {
             $this->hasNamespace = false;
             $this->classEndsAt = -1;
         }
