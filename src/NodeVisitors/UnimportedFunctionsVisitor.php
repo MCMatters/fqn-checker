@@ -9,7 +9,7 @@ use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Name;
 use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\NodeVisitorAbstract;
-use const false;
+use const false, true;
 
 /**
  * Class UnimportedFunctionsVisitor
@@ -31,7 +31,12 @@ class UnimportedFunctionsVisitor extends NodeVisitorAbstract
     /**
      * @var int
      */
-    protected $classEndsAt = -1;
+    protected $namespaceEndsAt = -1;
+
+    /**
+     * @var bool
+     */
+    protected $isBracedNamespace = false;
 
     /**
      * @var bool
@@ -96,12 +101,20 @@ class UnimportedFunctionsVisitor extends NodeVisitorAbstract
     {
         if (!$this->hasNamespace && $node instanceof Namespace_) {
             $this->hasNamespace = true;
-            $this->classEndsAt = $node->getAttribute('endLine');
+
+            if ($node->getAttribute('kind') === Namespace_::KIND_BRACED) {
+                $this->isBracedNamespace = true;
+                $this->namespaceEndsAt = $node->getAttribute('endLine');
+            }
         }
 
-        if ($this->hasNamespace && $node->getAttribute('startLine') >= $this->classEndsAt) {
+        if ($this->hasNamespace &&
+            $this->isBracedNamespace &&
+            $node->getAttribute('startLine') >= $this->namespaceEndsAt
+        ) {
             $this->hasNamespace = false;
-            $this->classEndsAt = -1;
+            $this->isBracedNamespace = false;
+            $this->namespaceEndsAt = -1;
         }
 
         return $this->hasNamespace;
