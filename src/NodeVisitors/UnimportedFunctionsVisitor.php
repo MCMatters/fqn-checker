@@ -9,7 +9,7 @@ use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Name;
 use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\NodeVisitorAbstract;
-use const false, true;
+use const null;
 
 /**
  * Class UnimportedFunctionsVisitor
@@ -29,29 +29,9 @@ class UnimportedFunctionsVisitor extends NodeVisitorAbstract
     protected $imported = [];
 
     /**
-     * @var int
+     * @var string
      */
-    protected $namespaceEndsAt = -1;
-
-    /**
-     * @var bool
-     */
-    protected $isBracedNamespace = false;
-
-    /**
-     * @var bool
-     */
-    protected $hasNamespace = false;
-
-    /**
-     * FqnNodeVisitor constructor.
-     *
-     * @param array $imported
-     */
-    public function __construct(array $imported = [])
-    {
-        $this->imported = $imported;
-    }
+    protected $namespace;
 
     /**
      * @param Node $node
@@ -60,14 +40,18 @@ class UnimportedFunctionsVisitor extends NodeVisitorAbstract
      */
     public function enterNode(Node $node)
     {
+        if ($node instanceof Namespace_) {
+            $this->namespace = $node->name->toString();
+            $this->imported[$this->namespace] = $node->getAttribute('imported_functions');
+
+            return;
+        }
+
         if ($this->shouldSkipNode($node)) {
             return;
         }
 
-        $this->unimported[] = [
-            'line'     => $node->getLine(),
-            'function' => $node->name->toString(),
-        ];
+        $this->unimported[$this->namespace][$node->name->toString()][] = $node->getLine();
     }
 
     /**
@@ -79,17 +63,11 @@ class UnimportedFunctionsVisitor extends NodeVisitorAbstract
     }
 
     /**
-     * @param Node $node
-     *
-     * @return bool
+     * @return array
      */
-    protected function shouldSkipNode(Node $node): bool
+    public function getImported(): array
     {
-        return !$this->hasNamespace($node) ||
-            !$node instanceof FuncCall ||
-            !$node->name instanceof Name ||
-            $node->name->isFullyQualified() ||
-            isset($this->imported[$node->name->toString()]);
+        return $this->imported;
     }
 
     /**
@@ -97,26 +75,20 @@ class UnimportedFunctionsVisitor extends NodeVisitorAbstract
      *
      * @return bool
      */
-    protected function hasNamespace(Node $node): bool
+    protected function shouldSkipNode(Node $node): bool
     {
-        if (!$this->hasNamespace && $node instanceof Namespace_) {
-            $this->hasNamespace = true;
+        return !$this->hasNamespace() ||
+            !$node instanceof FuncCall ||
+            !$node->name instanceof Name ||
+            $node->name->isFullyQualified() ||
+            isset($this->imported[$this->namespace][$node->name->toString()]);
+    }
 
-            if ($node->getAttribute('kind') === Namespace_::KIND_BRACED) {
-                $this->isBracedNamespace = true;
-                $this->namespaceEndsAt = $node->getAttribute('endLine');
-            }
-        }
-
-        if ($this->hasNamespace &&
-            $this->isBracedNamespace &&
-            $node->getAttribute('startLine') >= $this->namespaceEndsAt
-        ) {
-            $this->hasNamespace = false;
-            $this->isBracedNamespace = false;
-            $this->namespaceEndsAt = -1;
-        }
-
-        return $this->hasNamespace;
+    /**
+     * @return bool
+     */
+    protected function hasNamespace(): bool
+    {
+        return null !== $this->namespace;
     }
 }

@@ -4,12 +4,13 @@ declare(strict_types = 1);
 
 namespace McMatters\FqnChecker;
 
-use McMatters\FqnChecker\NodeVisitors\ImportedFunctionsVisitor;
+use McMatters\FqnChecker\NodeVisitors\ImportedFunctionsResolver;
 use McMatters\FqnChecker\NodeVisitors\UnimportedFunctionsVisitor;
 use PhpParser\Node\Stmt;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor\NameResolver;
 use PhpParser\ParserFactory;
+use function array_filter;
 
 /**
  * Class FqnChecker
@@ -47,9 +48,7 @@ class FqnChecker
     {
         $this->traverser = new NodeTraverser();
 
-        $this->setAst($content)
-            ->setImported()
-            ->setUnimported();
+        $this->setAst($content)->resolve();
     }
 
     /**
@@ -57,7 +56,9 @@ class FqnChecker
      */
     public function getImported(): array
     {
-        return $this->imported;
+        return array_filter($this->imported, function ($item) {
+            return !empty($item);
+        });
     }
 
     /**
@@ -85,34 +86,18 @@ class FqnChecker
     /**
      * @return \McMatters\FqnChecker\FqnChecker
      */
-    protected function setImported(): self
+    protected function resolve(): self
     {
-        $importedVisitor = new ImportedFunctionsVisitor();
-        $nameResolverVisitor = new NameResolver();
+        $importedResolverVisitor = new ImportedFunctionsResolver();
+        $unimportedVisitor = new UnimportedFunctionsVisitor();
 
-        $this->traverser->addVisitor($nameResolverVisitor);
-        $this->traverser->addVisitor($importedVisitor);
-        $this->traverser->traverse($this->ast);
-        $this->traverser->removeVisitor($nameResolverVisitor);
-        $this->traverser->removeVisitor($importedVisitor);
-
-        $this->imported = $importedVisitor->getImported();
-
-        return $this;
-    }
-
-    /**
-     * @return \McMatters\FqnChecker\FqnChecker
-     */
-    protected function setUnimported(): self
-    {
-        $unimportedVisitor = new UnimportedFunctionsVisitor($this->getImported());
-
+        $this->traverser->addVisitor(new NameResolver());
+        $this->traverser->addVisitor($importedResolverVisitor);
         $this->traverser->addVisitor($unimportedVisitor);
         $this->traverser->traverse($this->ast);
-        $this->traverser->removeVisitor($unimportedVisitor);
 
         $this->unimported = $unimportedVisitor->getUnimported();
+        $this->imported = $unimportedVisitor->getImported();
 
         return $this;
     }
