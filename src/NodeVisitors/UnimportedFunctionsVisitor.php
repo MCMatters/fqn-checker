@@ -41,6 +41,10 @@ class UnimportedFunctionsVisitor extends NodeVisitorAbstract
     public function enterNode(Node $node)
     {
         if ($node instanceof Namespace_) {
+            if (null === $node->name) {
+                return;
+            }
+
             $this->namespace = $node->name->toString();
             $this->imported[$this->namespace] = $node->getAttribute('imported_functions');
 
