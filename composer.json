@@ -7,9 +7,14 @@
             "email": "dima.matters@gmail.com"
         }
     ],
+    "bin": [
+        "bin/fqn-check"
+    ],
     "require": {
         "php": ">=7.0",
-        "nikic/php-parser": "~3.0|~4.0"
+        "nikic/php-parser": "~3.0|~4.0",
+        "symfony/console": "~3.0|~4.0",
+        "symfony/finder": "~3.0|~4.0"
     },
     "autoload": {
         "psr-4": {

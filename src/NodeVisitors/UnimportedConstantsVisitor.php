@@ -5,18 +5,18 @@ declare(strict_types = 1);
 namespace McMatters\FqnChecker\NodeVisitors;
 
 use PhpParser\Node;
-use PhpParser\Node\Expr\FuncCall;
+use PhpParser\Node\Expr\ConstFetch;
 use PhpParser\Node\Name;
 use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\NodeVisitorAbstract;
 use const null;
 
 /**
- * Class UnimportedFunctionsVisitor
+ * Class UnimportedConstantsVisitor
  *
  * @package McMatters\FqnChecker\NodeVisitors
  */
-class UnimportedFunctionsVisitor extends NodeVisitorAbstract
+class UnimportedConstantsVisitor extends NodeVisitorAbstract
 {
     /**
      * @var array
@@ -46,7 +46,7 @@ class UnimportedFunctionsVisitor extends NodeVisitorAbstract
             }
 
             $this->namespace = $node->name->toString();
-            $this->imported[$this->namespace] = $node->getAttribute('imported_functions') ?? [];
+            $this->imported[$this->namespace] = $node->getAttribute('imported_constants') ?? [];
 
             return;
         }
@@ -82,7 +82,7 @@ class UnimportedFunctionsVisitor extends NodeVisitorAbstract
     protected function shouldSkipNode(Node $node): bool
     {
         return !$this->hasNamespace() ||
-            !$node instanceof FuncCall ||
+            !$node instanceof ConstFetch ||
             !$node->name instanceof Name ||
             $node->name->isFullyQualified() ||
             isset($this->imported[$this->namespace][$node->name->toString()]);
