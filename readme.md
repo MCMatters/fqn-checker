@@ -40,7 +40,7 @@ class Wrong
 {
     public function testArray()
     {
-        return array_filter([]);
+        return array_filter([], null);
     }
     
     public function testString()
@@ -52,17 +52,29 @@ class Wrong
 
 **Result**
 ```text
-Array
-(
-    [0] => Array
-        (
-            [line] => 11
-            [function] => array_filter
-        )
-)
+[
+    'constants' => [
+        'Acme' => [
+            'null' => [
+                13,
+            ],
+        ],
+    ],
+    'functions' => [
+        'Acme' => [
+            'array_filter' => [
+                13,
+            ],
+        ],
+    ],
+]
 
-Array
-(
-    [ucfirst] => true
-)
+[
+    'constants' => [],
+    'functions' = [
+        'Acme' => [
+            'ucfirst' => true,
+        ],
+    ],
+]
 ```
