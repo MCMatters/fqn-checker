@@ -7,12 +7,11 @@ namespace McMatters\FqnChecker\Console\Command;
 use McMatters\FqnChecker\FqnChecker;
 use Symfony\Component\Console\{
     Command\Command, Helper\Table, Helper\TableCell, Helper\TableSeparator,
-    Helper\TableStyle, Input\InputArgument, Input\InputDefinition,
-    Input\InputInterface, Output\OutputInterface
+    Input\InputArgument, Input\InputDefinition, Input\InputInterface, Output\OutputInterface
 };
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
-use const PHP_EOL, STR_PAD_BOTH;
+use const PHP_EOL;
 use function count, implode, is_file, ucfirst;
 
 /**
@@ -54,9 +53,6 @@ class RunCommand extends Command
             return;
         }
 
-        $tableStyle = new TableStyle();
-        $tableStyle->setPadType(STR_PAD_BOTH);
-
         foreach ($files as $file) {
             $checker = new FqnChecker($file->getContents());
             $flatten = $checker->getFlattenUnimported();
@@ -65,8 +61,8 @@ class RunCommand extends Command
             foreach ($flatten as $namespace => $types) {
                 $output->writeln([
                     PHP_EOL,
-                    "File: {$file}",
-                    "Namespace: {$namespace}",
+                    "FILE: {$file}",
+                    "NAMESPACE: {$namespace}",
                 ]);
 
                 $table = new Table($output);
@@ -85,7 +81,7 @@ class RunCommand extends Command
                     }
                 }
 
-                $table->setStyle($tableStyle)->setRows($rows)->render();
+                $table->setRows($rows)->render();
             }
         }
     }
