@@ -8,7 +8,6 @@ use McMatters\FqnChecker\NodeVisitors\{
     ImportedConstantsResolver, ImportedFunctionsResolver,
     UnimportedConstantsVisitor, UnimportedFunctionsVisitor
 };
-use PhpParser\Node\Stmt;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor\NameResolver;
 use PhpParser\ParserFactory;
@@ -32,12 +31,12 @@ class FqnChecker
     protected $constants = [];
 
     /**
-     * @var Stmt[]
+     * @var \PhpParser\Node\Stmt[]
      */
     protected $ast;
 
     /**
-     * @var NodeTraverser
+     * @var \PhpParser\NodeTraverser
      */
     protected $traverser;
 

@@ -22,7 +22,7 @@ class ImportedConstantsVisitor extends NodeVisitorAbstract
     protected $imported = [];
 
     /**
-     * @param Node $node
+     * @param \PhpParser\Node $node
      *
      * @return void
      */

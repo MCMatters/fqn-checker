@@ -8,6 +8,7 @@ use PhpParser\Node;
 use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Name;
 use PhpParser\Node\Stmt\Namespace_;
+use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitorAbstract;
 use const null;
 
@@ -34,15 +35,15 @@ class UnimportedFunctionsVisitor extends NodeVisitorAbstract
     protected $namespace;
 
     /**
-     * @param Node $node
+     * @param \PhpParser\Node $node
      *
-     * @return void
+     * @return int|void
      */
     public function enterNode(Node $node)
     {
         if ($node instanceof Namespace_) {
             if (null === $node->name) {
-                return;
+                return NodeTraverser::DONT_TRAVERSE_CHILDREN;
             }
 
             $this->namespace = $node->name->toString();
@@ -75,7 +76,7 @@ class UnimportedFunctionsVisitor extends NodeVisitorAbstract
     }
 
     /**
-     * @param Node $node
+     * @param \PhpParser\Node $node
      *
      * @return bool
      */

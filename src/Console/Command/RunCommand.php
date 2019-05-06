@@ -32,57 +32,87 @@ class RunCommand extends Command
     }
 
     /**
-     * @param InputInterface $input
-     * @param OutputInterface $output
+     * @param \Symfony\Component\Console\Input\InputInterface $input
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
      *
      * @return void
+     * @throws \Symfony\Component\Console\Exception\InvalidArgumentException
+     * @throws \InvalidArgumentException
+     * @throws \RuntimeException
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $path = $input->getArgument('path');
-
-        if (is_file($path)) {
-            $files = [new SplFileInfo($path, $path, $path)];
-        } else {
-            $files = (new Finder())->files()->in($path)->name('*.php');
-        }
-
-        if (!count($files)) {
+        if (!count($files = $this->getFiles($input))) {
             $output->writeln('There are no php files in your directory');
 
             return;
         }
 
         foreach ($files as $file) {
-            $checker = new FqnChecker($file->getContents());
-            $flatten = $checker->getFlattenUnimported();
-            $rows = [];
+            $this->renderTable(
+                $output,
+                $file,
+                (new FqnChecker($file->getContents()))->getFlattenUnimported()
+            );
+        }
+    }
 
-            foreach ($flatten as $namespace => $types) {
-                $output->writeln([
-                    PHP_EOL,
-                    "FILE: {$file}",
-                    "NAMESPACE: {$namespace}",
-                ]);
+    /**
+     * @param \Symfony\Component\Console\Input\InputInterface $input
+     *
+     * @return array|\Symfony\Component\Finder\Finder
+     * @throws \InvalidArgumentException
+     * @throws \Symfony\Component\Console\Exception\InvalidArgumentException
+     */
+    protected function getFiles(InputInterface $input)
+    {
+        $path = $input->getArgument('path');
 
-                $table = new Table($output);
-                $table->setHeaders(['Unimported', 'Lines']);
+        return is_file($path)
+            ? [new SplFileInfo($path, $path, $path)]
+            : (new Finder())->files()->in($path)->name('*.php');
+    }
 
-                foreach ($types as $type => $unimported) {
-                    $rows[] = new TableSeparator();
-                    $rows[] = [new TableCell(
-                        '<comment>'.ucfirst($type).'</comment>',
-                        ['colspan' => 2]
-                    )];
-                    $rows[] = new TableSeparator();
+    /**
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     * @param string|\Symfony\Component\Finder\SplFileInfo $file
+     * @param array $flatten
+     *
+     * @return void
+     * @throws \Symfony\Component\Console\Exception\InvalidArgumentException
+     */
+    protected function renderTable(
+        OutputInterface $output,
+        $file,
+        array $flatten
+    ) {
+        $rows = [];
 
-                    foreach ($unimported as $key => $values) {
-                        $rows[] = [$key, implode(', ', $values)];
-                    }
+        foreach ($flatten as $namespace => $types) {
+            $output->writeln([
+                "FILE: {$file}",
+                "NAMESPACE: {$namespace}",
+            ]);
+
+            $table = new Table($output);
+            $table->setHeaders(['Unimported', 'Lines']);
+
+            foreach ($types as $type => $unimported) {
+                $rows[] = new TableSeparator();
+                $rows[] = [new TableCell(
+                    '<comment>'.ucfirst($type).'</comment>',
+                    ['colspan' => 2]
+                )];
+                $rows[] = new TableSeparator();
+
+                foreach ($unimported as $key => $values) {
+                    $rows[] = [$key, implode(', ', $values)];
                 }
-
-                $table->setRows($rows)->render();
             }
+
+            $table->setRows($rows)->render();
+
+            $output->write(PHP_EOL);
         }
     }
 }

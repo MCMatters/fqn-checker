@@ -17,9 +17,9 @@ use PhpParser\NodeVisitorAbstract;
 class ImportedConstantsResolver extends NodeVisitorAbstract
 {
     /**
-     * @param Node $node
+     * @param \PhpParser\Node $node
      *
-     * @return void
+     * @return int|void
      */
     public function enterNode(Node $node)
     {
@@ -30,6 +30,8 @@ class ImportedConstantsResolver extends NodeVisitorAbstract
             $traverser->traverse($node->stmts);
 
             $node->setAttribute('imported_constants', $visitor->getImported());
+
+            return NodeTraverser::DONT_TRAVERSE_CHILDREN;
         }
     }
 }
