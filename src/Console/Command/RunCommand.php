@@ -45,7 +45,7 @@ class RunCommand extends Command
         if (!count($files = $this->getFiles($input))) {
             $output->writeln('There are no php files in your directory');
 
-            return;
+            return 0;
         }
 
         foreach ($files as $file) {
@@ -55,6 +55,8 @@ class RunCommand extends Command
                 (new FqnChecker($file->getContents()))->getFlattenUnimported()
             );
         }
+
+	return 0;
     }
 
     /**
