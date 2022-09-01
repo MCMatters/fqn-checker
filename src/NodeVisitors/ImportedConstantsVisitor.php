@@ -1,12 +1,13 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace McMatters\FqnChecker\NodeVisitors;
 
 use PhpParser\Node;
 use PhpParser\Node\Stmt\Use_;
 use PhpParser\NodeVisitorAbstract;
+
 use const true;
 
 /**

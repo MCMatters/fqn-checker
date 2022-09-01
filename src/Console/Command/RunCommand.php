@@ -1,18 +1,27 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace McMatters\FqnChecker\Console\Command;
 
 use McMatters\FqnChecker\FqnChecker;
-use Symfony\Component\Console\{
-    Command\Command, Helper\Table, Helper\TableCell, Helper\TableSeparator,
-    Input\InputArgument, Input\InputDefinition, Input\InputInterface, Output\OutputInterface
-};
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\Console\Helper\TableCell;
+use Symfony\Component\Console\Helper\TableSeparator;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputDefinition;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
+
+use function count;
+use function implode;
+use function is_file;
+use function ucfirst;
+
 use const PHP_EOL;
-use function count, implode, is_file, ucfirst;
 
 /**
  * Class RunCommand
@@ -35,7 +44,8 @@ class RunCommand extends Command
      * @param \Symfony\Component\Console\Input\InputInterface $input
      * @param \Symfony\Component\Console\Output\OutputInterface $output
      *
-     * @return void
+     * @return int
+     *
      * @throws \Symfony\Component\Console\Exception\InvalidArgumentException
      * @throws \InvalidArgumentException
      * @throws \RuntimeException
@@ -56,13 +66,14 @@ class RunCommand extends Command
             );
         }
 
-	return 0;
+	    return 0;
     }
 
     /**
      * @param \Symfony\Component\Console\Input\InputInterface $input
      *
      * @return array|\Symfony\Component\Finder\Finder
+     *
      * @throws \InvalidArgumentException
      * @throws \Symfony\Component\Console\Exception\InvalidArgumentException
      */
@@ -81,6 +92,7 @@ class RunCommand extends Command
      * @param array $flatten
      *
      * @return void
+     *
      * @throws \Symfony\Component\Console\Exception\InvalidArgumentException
      */
     protected function renderTable(

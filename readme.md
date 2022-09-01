@@ -13,7 +13,7 @@ composer require mcmatters/fqn-checker
 ```php
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 use McMatters\FqnChecker\FqnChecker;
 
@@ -30,7 +30,7 @@ Listing of **Wrong.php**
 ```php
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Acme;
 

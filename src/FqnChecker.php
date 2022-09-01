@@ -1,16 +1,17 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace McMatters\FqnChecker;
 
-use McMatters\FqnChecker\NodeVisitors\{
-    ImportedConstantsResolver, ImportedFunctionsResolver,
-    UnimportedConstantsVisitor, UnimportedFunctionsVisitor
-};
+use McMatters\FqnChecker\NodeVisitors\ImportedConstantsResolver;
+use McMatters\FqnChecker\NodeVisitors\ImportedFunctionsResolver;
+use McMatters\FqnChecker\NodeVisitors\UnimportedConstantsVisitor;
+use McMatters\FqnChecker\NodeVisitors\UnimportedFunctionsVisitor;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor\NameResolver;
 use PhpParser\ParserFactory;
+
 use function array_filter;
 
 /**
@@ -57,7 +58,7 @@ class FqnChecker
      */
     public function getImportedFunctions(): array
     {
-        return array_filter($this->functions['imported'] ?? [], function ($item) {
+        return array_filter($this->functions['imported'] ?? [], static function ($item) {
             return !empty($item);
         });
     }
@@ -75,7 +76,7 @@ class FqnChecker
      */
     public function getImportedConstants(): array
     {
-        return array_filter($this->constants['imported'] ?? [], function ($item) {
+        return array_filter($this->constants['imported'] ?? [], static function ($item) {
             return !empty($item);
         });
     }

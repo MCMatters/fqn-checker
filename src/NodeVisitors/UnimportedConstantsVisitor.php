@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace McMatters\FqnChecker\NodeVisitors;
 
@@ -10,6 +10,7 @@ use PhpParser\Node\Name;
 use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitorAbstract;
+
 use const null;
 
 /**
