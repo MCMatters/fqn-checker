@@ -10,24 +10,11 @@ use PhpParser\NodeVisitorAbstract;
 
 use const true;
 
-/**
- * Class ImportedFunctionsVisitor
- *
- * @package McMatters\FqnChecker\NodeVisitors
- */
 class ImportedFunctionsVisitor extends NodeVisitorAbstract
 {
-    /**
-     * @var array
-     */
-    protected $imported = [];
+    protected array $imported = [];
 
-    /**
-     * @param \PhpParser\Node $node
-     *
-     * @return void
-     */
-    public function enterNode(Node $node)
+    public function enterNode(Node $node): void
     {
         if ($node instanceof Use_ && $node->type === Use_::TYPE_FUNCTION) {
             foreach ($node->uses as $use) {
@@ -36,9 +23,6 @@ class ImportedFunctionsVisitor extends NodeVisitorAbstract
         }
     }
 
-    /**
-     * @return array
-     */
     public function getImported(): array
     {
         return $this->imported;

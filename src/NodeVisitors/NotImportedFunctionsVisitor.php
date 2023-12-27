@@ -13,31 +13,15 @@ use PhpParser\NodeVisitorAbstract;
 
 use const null;
 
-/**
- * Class UnimportedFunctionsVisitor
- *
- * @package McMatters\FqnChecker\NodeVisitors
- */
-class UnimportedFunctionsVisitor extends NodeVisitorAbstract
+class NotImportedFunctionsVisitor extends NodeVisitorAbstract
 {
-    /**
-     * @var array
-     */
-    protected $unimported = [];
+    protected array $notImported = [];
+
+    protected array $imported = [];
+
+    protected ?string $namespace = null;
 
     /**
-     * @var array
-     */
-    protected $imported = [];
-
-    /**
-     * @var string
-     */
-    protected $namespace;
-
-    /**
-     * @param \PhpParser\Node $node
-     *
      * @return int|void
      */
     public function enterNode(Node $node)
@@ -57,30 +41,19 @@ class UnimportedFunctionsVisitor extends NodeVisitorAbstract
             return;
         }
 
-        $this->unimported[$this->namespace][$node->name->toString()][] = $node->getLine();
+        $this->notImported[$this->namespace][$node->name->toString()][] = $node->getLine();
     }
 
-    /**
-     * @return array
-     */
-    public function getUnimported(): array
+    public function getNotImported(): array
     {
-        return $this->unimported;
+        return $this->notImported;
     }
 
-    /**
-     * @return array
-     */
     public function getImported(): array
     {
         return $this->imported;
     }
 
-    /**
-     * @param \PhpParser\Node $node
-     *
-     * @return bool
-     */
     protected function shouldSkipNode(Node $node): bool
     {
         return !$this->hasNamespace() ||
@@ -90,9 +63,6 @@ class UnimportedFunctionsVisitor extends NodeVisitorAbstract
             isset($this->imported[$this->namespace][$node->name->toString()]);
     }
 
-    /**
-     * @return bool
-     */
     protected function hasNamespace(): bool
     {
         return null !== $this->namespace;

@@ -9,16 +9,9 @@ use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitorAbstract;
 
-/**
- * Class ImportedConstantsResolver
- *
- * @package McMatters\FqnChecker\NodeVisitors
- */
 class ImportedConstantsResolver extends NodeVisitorAbstract
 {
     /**
-     * @param \PhpParser\Node $node
-     *
      * @return int|void
      */
     public function enterNode(Node $node)
@@ -26,6 +19,7 @@ class ImportedConstantsResolver extends NodeVisitorAbstract
         if ($node instanceof Namespace_ && !empty($node->stmts)) {
             $traverser = new NodeTraverser();
             $visitor = new ImportedConstantsVisitor();
+
             $traverser->addVisitor($visitor);
             $traverser->traverse($node->stmts);
 

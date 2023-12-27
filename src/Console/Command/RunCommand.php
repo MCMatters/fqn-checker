@@ -16,43 +16,22 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 
-use function count;
 use function implode;
 use function is_file;
 use function ucfirst;
 
 use const PHP_EOL;
 
-/**
- * Class RunCommand
- *
- * @package McMatters\FqnChecker\Console\Command
- */
 class RunCommand extends Command
 {
     /**
-     * @return void
-     */
-    public function configure()
-    {
-        $this->setName('fqn-checker:check')->setDefinition(new InputDefinition([
-            new InputArgument('path'),
-        ]));
-    }
-
-    /**
-     * @param \Symfony\Component\Console\Input\InputInterface $input
-     * @param \Symfony\Component\Console\Output\OutputInterface $output
-     *
-     * @return int
-     *
      * @throws \Symfony\Component\Console\Exception\InvalidArgumentException
      * @throws \InvalidArgumentException
      * @throws \RuntimeException
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
-        if (!count($files = $this->getFiles($input))) {
+        if (empty($files = $this->getFiles($input))) {
             $output->writeln('There are no php files in your directory');
 
             return 0;
@@ -62,22 +41,14 @@ class RunCommand extends Command
             $this->renderTable(
                 $output,
                 $file,
-                (new FqnChecker($file->getContents()))->getFlattenUnimported()
+                (new FqnChecker($file->getContents()))->getFlattenNotImported(),
             );
         }
 
 	    return 0;
     }
 
-    /**
-     * @param \Symfony\Component\Console\Input\InputInterface $input
-     *
-     * @return array|\Symfony\Component\Finder\Finder
-     *
-     * @throws \InvalidArgumentException
-     * @throws \Symfony\Component\Console\Exception\InvalidArgumentException
-     */
-    protected function getFiles(InputInterface $input)
+    protected function getFiles(InputInterface $input): array|Finder
     {
         $path = $input->getArgument('path');
 
@@ -86,20 +57,11 @@ class RunCommand extends Command
             : (new Finder())->files()->in($path)->name('*.php');
     }
 
-    /**
-     * @param \Symfony\Component\Console\Output\OutputInterface $output
-     * @param string|\Symfony\Component\Finder\SplFileInfo $file
-     * @param array $flatten
-     *
-     * @return void
-     *
-     * @throws \Symfony\Component\Console\Exception\InvalidArgumentException
-     */
     protected function renderTable(
         OutputInterface $output,
-        $file,
-        array $flatten
-    ) {
+        SplFileInfo|string $file,
+        array $flatten,
+    ): void {
         $rows = [];
 
         foreach ($flatten as $namespace => $types) {
@@ -109,9 +71,9 @@ class RunCommand extends Command
             ]);
 
             $table = new Table($output);
-            $table->setHeaders(['Unimported', 'Lines']);
+            $table->setHeaders(['Not imported', 'Lines']);
 
-            foreach ($types as $type => $unimported) {
+            foreach ($types as $type => $notImported) {
                 $rows[] = new TableSeparator();
                 $rows[] = [new TableCell(
                     '<comment>'.ucfirst($type).'</comment>',
@@ -119,7 +81,7 @@ class RunCommand extends Command
                 )];
                 $rows[] = new TableSeparator();
 
-                foreach ($unimported as $key => $values) {
+                foreach ($notImported as $key => $values) {
                     $rows[] = [$key, implode(', ', $values)];
                 }
             }
@@ -128,5 +90,12 @@ class RunCommand extends Command
 
             $output->write(PHP_EOL);
         }
+    }
+
+    protected function configure(): void
+    {
+        $this
+            ->setName('fqn-checker:check')
+            ->setDefinition(new InputDefinition([new InputArgument('path')]));
     }
 }

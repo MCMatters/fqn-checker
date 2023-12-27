@@ -6,46 +6,27 @@ namespace McMatters\FqnChecker;
 
 use McMatters\FqnChecker\NodeVisitors\ImportedConstantsResolver;
 use McMatters\FqnChecker\NodeVisitors\ImportedFunctionsResolver;
-use McMatters\FqnChecker\NodeVisitors\UnimportedConstantsVisitor;
-use McMatters\FqnChecker\NodeVisitors\UnimportedFunctionsVisitor;
+use McMatters\FqnChecker\NodeVisitors\NotImportedConstantsVisitor;
+use McMatters\FqnChecker\NodeVisitors\NotImportedFunctionsVisitor;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor\NameResolver;
 use PhpParser\ParserFactory;
 
 use function array_filter;
 
-/**
- * Class FqnChecker
- *
- * @package McMatters\FqnChecker
- */
 class FqnChecker
 {
-    /**
-     * @var array
-     */
-    protected $functions = [];
+    protected array $functions = [];
 
-    /**
-     * @var array
-     */
-    protected $constants = [];
+    protected array $constants = [];
 
     /**
      * @var \PhpParser\Node\Stmt[]
      */
-    protected $ast;
+    protected array $ast;
 
-    /**
-     * @var \PhpParser\NodeTraverser
-     */
-    protected $traverser;
+    protected NodeTraverser $traverser;
 
-    /**
-     * FqnChecker constructor.
-     *
-     * @param string $content
-     */
     public function __construct(string $content)
     {
         $this->traverser = new NodeTraverser();
@@ -53,45 +34,32 @@ class FqnChecker
         $this->setAst($content)->resolve();
     }
 
-    /**
-     * @return array
-     */
     public function getImportedFunctions(): array
     {
-        return array_filter($this->functions['imported'] ?? [], static function ($item) {
-            return !empty($item);
-        });
+        return array_filter(
+            $this->functions['imported'] ?? [],
+            static fn ($item) => !empty($item),
+        );
     }
 
-    /**
-     * @return array
-     */
-    public function getUnimportedFunctions(): array
+    public function getNotImportedFunctions(): array
     {
-        return $this->functions['unimported'] ?? [];
+        return $this->functions['not_imported'] ?? [];
     }
 
-    /**
-     * @return array
-     */
     public function getImportedConstants(): array
     {
-        return array_filter($this->constants['imported'] ?? [], static function ($item) {
-            return !empty($item);
-        });
+        return array_filter(
+            $this->constants['imported'] ?? [],
+            static fn ($item) => !empty($item),
+        );
     }
 
-    /**
-     * @return array
-     */
-    public function getUnimportedConstants(): array
+    public function getNotImportedConstants(): array
     {
-        return $this->constants['unimported'] ?? [];
+        return $this->constants['not_imported'] ?? [];
     }
 
-    /**
-     * @return array
-     */
     public function getImported(): array
     {
         return [
@@ -100,60 +68,46 @@ class FqnChecker
         ];
     }
 
-    /**
-     * @return array
-     */
-    public function getUnimported(): array
+    public function getNotImported(): array
     {
         return [
-            'constants' => $this->getUnimportedConstants(),
-            'functions' => $this->getUnimportedFunctions(),
+            'constants' => $this->getNotImportedConstants(),
+            'functions' => $this->getNotImportedFunctions(),
         ];
     }
 
-    /**
-     * @return array
-     */
     public function all(): array
     {
         return [
             'constants' => [
                 'imported' => $this->getImportedConstants(),
-                'unimported' => $this->getUnimportedConstants(),
+                'not_imported' => $this->getNotImportedConstants(),
             ],
             'functions' => [
                 'imported' => $this->getImportedFunctions(),
-                'unimported' => $this->getUnimportedFunctions(),
+                'not_imported' => $this->getNotImportedFunctions(),
             ],
         ];
     }
 
-    /**
-     * @return array
-     */
-    public function getFlattenUnimported(): array
+    public function getFlattenNotImported(): array
     {
-        $unimportedFunctions = $this->getUnimportedFunctions();
-        $unimportedConstants = $this->getUnimportedConstants();
+        $notImportedFunctions = $this->getNotImportedFunctions();
+        $notImportedConstants = $this->getNotImportedConstants();
 
         $flatten = [];
 
-        foreach ($unimportedFunctions as $namespace => $functions) {
+        foreach ($notImportedFunctions as $namespace => $functions) {
             $flatten[$namespace]['functions'] = $functions;
         }
 
-        foreach ($unimportedConstants as $namespace => $constants) {
+        foreach ($notImportedConstants as $namespace => $constants) {
             $flatten[$namespace]['constants'] = $constants;
         }
 
         return $flatten;
     }
 
-    /**
-     * @param string $content
-     *
-     * @return \McMatters\FqnChecker\FqnChecker
-     */
     protected function setAst(string $content): self
     {
         $this->ast = (new ParserFactory())
@@ -163,37 +117,31 @@ class FqnChecker
         return $this;
     }
 
-    /**
-     * @return \McMatters\FqnChecker\FqnChecker
-     */
     protected function resolve(): self
     {
         $this->traverseResolvers();
 
-        $functions = new UnimportedFunctionsVisitor();
-        $constants = new UnimportedConstantsVisitor();
+        $functions = new NotImportedFunctionsVisitor();
+        $constants = new NotImportedConstantsVisitor();
 
         $this->traverser->addVisitor($functions);
         $this->traverser->addVisitor($constants);
         $this->traverser->traverse($this->ast);
 
         $this->functions = [
-            'unimported' => $functions->getUnimported(),
+            'not_imported' => $functions->getNotImported(),
             'imported' => $functions->getImported(),
         ];
 
         $this->constants = [
-            'unimported' => $constants->getUnimported(),
+            'not_imported' => $constants->getNotImported(),
             'imported' => $constants->getImported(),
         ];
 
         return $this;
     }
 
-    /**
-     * @return void
-     */
-    protected function traverseResolvers()
+    protected function traverseResolvers(): void
     {
         $resolvers = [
             new NameResolver(),

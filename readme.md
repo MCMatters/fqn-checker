@@ -21,7 +21,7 @@ require 'vendor/autoload.php';
 
 $checker = new FqnChecker(file_get_contents(__DIR__.'/Wrong.php'));
 
-print_r($checker->getUnimported());
+print_r($checker->getNotImported());
 print_r($checker->getImported());
 ```
 
