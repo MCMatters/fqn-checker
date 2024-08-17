@@ -7,6 +7,7 @@ namespace McMatters\FqnChecker\NodeVisitors;
 use PhpParser\Node;
 use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\NodeTraverser;
+use PhpParser\NodeVisitor;
 use PhpParser\NodeVisitorAbstract;
 
 class ImportedFunctionsResolver extends NodeVisitorAbstract
@@ -25,7 +26,7 @@ class ImportedFunctionsResolver extends NodeVisitorAbstract
 
             $node->setAttribute('imported_functions', $visitor->getImported());
 
-            return NodeTraverser::DONT_TRAVERSE_CHILDREN;
+            return NodeVisitor::DONT_TRAVERSE_CHILDREN;
         }
     }
 }

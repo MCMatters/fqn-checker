@@ -111,7 +111,7 @@ class FqnChecker
     protected function setAst(string $content): self
     {
         $this->ast = (new ParserFactory())
-            ->create(ParserFactory::PREFER_PHP7)
+            ->createForHostVersion()
             ->parse($content);
 
         return $this;

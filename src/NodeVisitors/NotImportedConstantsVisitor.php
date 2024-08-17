@@ -8,7 +8,7 @@ use PhpParser\Node;
 use PhpParser\Node\Expr\ConstFetch;
 use PhpParser\Node\Name;
 use PhpParser\Node\Stmt\Namespace_;
-use PhpParser\NodeTraverser;
+use PhpParser\NodeVisitor;
 use PhpParser\NodeVisitorAbstract;
 
 use const null;
@@ -28,7 +28,7 @@ class NotImportedConstantsVisitor extends NodeVisitorAbstract
     {
         if ($node instanceof Namespace_) {
             if (null === $node->name) {
-                return NodeTraverser::DONT_TRAVERSE_CHILDREN;
+                return NodeVisitor::DONT_TRAVERSE_CHILDREN;
             }
 
             $this->namespace = $node->name->toString();
