@@ -11,8 +11,11 @@ use McMatters\FqnChecker\NodeVisitors\NotImportedFunctionsVisitor;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor\NameResolver;
 use PhpParser\ParserFactory;
+use RuntimeException;
 
 use function array_filter;
+use function defined;
+use function method_exists;
 
 class FqnChecker
 {
@@ -110,9 +113,21 @@ class FqnChecker
 
     protected function setAst(string $content): self
     {
-        $this->ast = (new ParserFactory())
-            ->create(ParserFactory::PREFER_PHP7)
-            ->parse($content);
+        $parserFactory = new ParserFactory();
+
+        if (method_exists($parserFactory, 'createForHostVersion')) {
+            $this->ast = $parserFactory->createForHostVersion()->parse($content);
+        } elseif (method_exists($parserFactory, 'createForNewestSupportedVersion')) {
+            $this->ast = (new ParserFactory())
+                ->createForNewestSupportedVersion()
+                ->parse($content);
+        } elseif (defined('ParserFactory::PREFER_PHP7') && method_exists($parserFactory, 'create')) {
+            $this->ast = (new ParserFactory())
+                ->create(ParserFactory::PREFER_PHP7)
+                ->parse($content);
+        } else {
+            throw new RuntimeException('Unable to parse the content');
+        }
 
         return $this;
     }
