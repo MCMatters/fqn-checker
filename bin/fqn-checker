@@ -40,7 +40,14 @@ if (!$autoloadExists) {
 }
 
 $app = new Application();
-$app->add(new RunCommand());
+
+if (method_exists($app, 'addCommand')) {
+    $app->addCommand(new RunCommand());
+} elseif (method_exists($app, 'add')) {
+    $app->add(new RunCommand());
+} else {
+    throw new RuntimeException('Unsupported application version');
+}
 
 $input = new ArrayInput([
     'command' => 'fqn-checker:check',
